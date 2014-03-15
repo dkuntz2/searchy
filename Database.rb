@@ -23,21 +23,14 @@ Database = "sqlite://searchdb.db"
 		Integer :count
 	end
 
-
-	require_relative "Word.rb"
-	require_relative "Page.rb"
-
-	class WordInPage < Sequel::Model
-		def before_create
-			self.count = 0
-		end
-
-		def word
-			return Word[self.word_id]
-		end
-
-		def page
-			return Page[self.page_id]
-		end
+	DB.create_table? :page_links do
+		primary_key :id
+		foreign_key :prime_page_id, :pages
+		foreign_key :linked_page_id, :pages
 	end
+
+
+	require "./models/Word.rb"
+	require "./models/Page.rb"
+
 #end

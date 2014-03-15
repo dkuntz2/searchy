@@ -36,7 +36,7 @@ class Page < Sequel::Model
 		# does the word exist in the DB
 		w = Word.where(:word => word)
 		if w.count == 0
-			return false
+			return nil
 		end
 
 		wip = WordInPage.where(:word_id => w.first.id, :page_id => self.id)

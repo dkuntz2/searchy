@@ -22,7 +22,7 @@ class DBTests < Test::Unit::TestCase
 		# make sure we have a page
 		Page.find_or_create :url => "http://don.kuntz.co"
 
-		terms = ["Don Kuntz", "Computer Science", "Carthage College"]
+		terms = ["Don Kuntz", "Computer Science", "Carthage College", "software", "developers", "code"]
 
 		terms.each do |t|
 			keys = t.split
@@ -35,6 +35,9 @@ class DBTests < Test::Unit::TestCase
 			Page.all.each do |page|
 				score = 0
 				keys.each do |term|
+					#puts "#{page.url} : #{term} : #{page.has_word term}"
+
+					#puts "page.has_word(term) = #{page.has_word term}"
 					unless page.has_word term
 						next
 					end

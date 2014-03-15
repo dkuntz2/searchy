@@ -6,3 +6,8 @@ gem "sanitize"
 gem "sinatra"
 gem "sinatra-sequel"
 gem "sinatra-contrib"
+gem "nokogiri"
+
+# DB
+gem "sqlite3", :groups => "development"
+gem "pg", :groups => "production"
