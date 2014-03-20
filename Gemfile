@@ -7,6 +7,7 @@ gem "sinatra"
 gem "sinatra-sequel"
 gem "sinatra-contrib"
 gem "nokogiri"
+gem "sass"
 
 # DB
 gem "sqlite3", :groups => "development"
