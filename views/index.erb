@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Searchy</title>
+	<link rel="stylesheet" href="/css/style.css" />
+
+	<script src="http://code.jquery.com/jquery-2.1.0.min.js"></script>
+	<script>
+
+		/*	wait_n is a closure which waits a number of seconds before calling
+			the passed in function. Which is kinda cool. The ability to pass
+			around objects is kinda cool.
+
+			As for why this is a separate function, instead of just part of the
+			function that requires the wait, I just thought it'd be cool to
+			generalize it. Also, ungeneralizing it could be tricky, and for some
+			reason my brain found the generalized implementation before it found
+			a specialized one...
+		*/
+		var wait_n = function(fn, wait) {
+			var last_call = null;
+			var call = null;
+			var delay = wait;
+
+			var caller = function(called) {
+				if (called !== undefined && called === true) {
+					last_call = Date.now();
+					clearTimeout(call);
+
+					console.log("Don't care, running anyways.");
+
+					fn();
+				} else if (last_call === null) {
+					console.log("First timeout");
+					last_call = Date.now();
+					call = setTimeout(fn, wait);
+				} else if (Date.now() - last_call < wait) {
+					console.log("Hasn't been long enough... waiting.");
+				} else {
+					console.log("Time to run, yeah!");
+
+					clearTimeout(call);
+					call = setTimeout(fn, wait);
+
+					last_call = Date.now();
+				}
+			}
+
+			return caller;
+		}
+
+		var set_results = function(data) {
+			var results = $("#results");
+			results.empty();
+
+			if (data.length === 0) {
+				$("<li/>").append("No results.").appendTo(results);
+				$("<li/>").append($("<a/>", { href: "/pages" }).text("Add some?")).appendTo(results);
+			}
+
+
+			$.each(data, function(i, item) {
+				var li = $("<li/>");
+				li.append($("<a/>", {href: item.url}).text(item.url));
+				li.appendTo(results);
+			});
+		}
+
+		var result_request = function() {
+			$.get('/search', {terms: $("#search").val()}, function(data) {
+				set_results(data);
+			});
+		}
+
+		var timed_request = wait_n(result_request, 2500);
+
+
+		$(document).ready(function() {
+			$("#search").bind("propertychange keyup input paste", timed_request);
+			$("#search").bind("change", function() { timed_request(true); })
+		});
+	</script>
+</head>
+<body>
+	<div class="container">
+		<header>
+			<h1>Searchy</h1>
+			<input id="search" type="text" />
+		</header>
+
+		<ul id="results">
+		</ul>
+	</div>
+</body>
+</html>

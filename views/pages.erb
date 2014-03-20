@@ -1,0 +1,48 @@
+<!doctype html>
+<html>
+<head>
+	<title>Pages in Searchy</title>
+	<link rel="stylesheet" href="/css/style.css" />
+
+</head>
+<body>
+	<div class="container">
+		<h1>Searchy Pages</h1>
+		
+		<form id="newpage" action="/pages/new" method="post">
+			<h2>Add a page</h2>
+			<p>
+				Adding a page may take a while. Especially because there's a
+				crawl depth of 10. This means that the first ten pages found in
+				the crawl are also crawled.
+			</p>
+
+			<p>&lsquo;We apologize for the inconvenience&rsquo;</p>
+			<input id="url" name="url" type="text" />
+			<input id="gotime" type="submit" />
+		</form>
+
+		<h2>Pages</h2>
+		<h3>Crawled</h3>
+		<ul>
+			<% @pages.each do |page| %>
+				<% if page.crawled? %>
+					<li><a href="<%= page.url %>"><%= page.url %></a></li>
+				<% end %>
+			<% end %>
+		</ul>
+
+		<h3>All</h3>
+		<ul id="pages">
+		<% @pages.each do |page| %>
+			<li>
+				<a href="<%= page.url %>"><%= page.url %></a>
+				<% unless page.crawled? %>
+					| <a href="/pages/<%= page.id %>/crawl">crawl</a>
+				<% end %>
+			</li>
+		<% end %>
+		</ul>
+	</div>
+</body>
+</html>

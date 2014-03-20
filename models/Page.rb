@@ -1,16 +1,58 @@
 require 'sequel'
 require 'uri'
-require 'net/http'
+require 'open-uri'
 require 'sanitize'
-require_relative 'utils.rb'
+
+require_relative '../utils.rb'
 
 class Page < Sequel::Model
-	def after_create
+
+	def self.crawl_uncrawled
+		Page.where(:crawled => false).each do |p|
+			puts "Crawling #{p.url}"
+			p.crawl
+		end
+	end
+
+	def self.crawl_domain domain
+		puts "Finding, and potentially crawling, root: #{domain}"
+		root = Page.find_or_create :url => domain
+		root.crawl unless root.crawled?
+
+		Page.where(:crawled => false).each do |p|
+			if p.url[0, domain.length] == domain
+				puts "Crawling #{p.url}"
+				p.crawl
+			end
+		end
+	end
+
+
+
+	def before_create
+		self.crawled = false
+		self.title = ""
+	end
+
+	def crawled?
+		self.crawled
+	end
+
+	def crawl
+		# clear out relations in other tables.
+		WordInPage.where(:page_id => self.id).each { |wip| wip.destroy }
+		PageLinks.where(:prime_id => self.id).each { |pl| pl.destroy }
+
+		# get some fun stuff...
 		uri = URI(self.url)
 		self.domain = uri.host
 
 		# grab the contents of the page
-		html = Net::HTTP.get(uri)
+		html = open(uri).read()
+		
+
+		##
+		# Word stuffs
 		cleaned = Sanitize.clean(html)
 		
 		# turn big string of words into array of words
@@ -25,11 +67,40 @@ class Page < Sequel::Model
 			w = Word.find_or_create :word => word
 			w.add_page self
 		end
+
+
+		## 
+		# links and such
+		noko = Nokogiri::HTML(html)
+		self.title = noko.css("title")[0].text
+
+		links = noko.css("a").each do |a|
+			# is this a real page?
+			link = a["href"]
+			if link[0] != "/" && link[0, ("http".length)] != "http"
+				next
+			end
+			if link[0] == "/"
+				link = uri.scheme + '://' + uri.host + link
+			end
+
+			if link[-1] == "/"
+				link.slice! -1
+			end
+
+			linked = Page.find_or_create :url => link
+			PageLinks.find_or_create :prime_id => self.id, :linked_id => linked.id
+		end
+
+
+		self.crawled = true
+		self.last_crawl = Time.now.to_i
+		self.save
 	end
 
 	def has_word word
 		wip = self.get_word_in_page word
-		return wip != nil
+		return !wip.nil?
 	end
 
 	def get_word_in_page word

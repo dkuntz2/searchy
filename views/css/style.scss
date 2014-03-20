@@ -1,0 +1,149 @@
+
+// colors
+$white:         hsl(220, 23%, 98%);
+
+$main:          hsl(190, 50%, 50%);
+$dark:          hsl(190, 50%, 30%);
+$darker:        hsl(190, 50%, 10%);
+$light:         hsl(190, 50%, 70%);
+$lighter:       hsl(190, 50%, 90%);
+
+$text:          hsl(221, 16%, 20%);
+$links:         hsl(221, 16%, 10%);
+
+$green:         hsl( 92, 28%, 75%);
+$dark-green:    hsl( 92, 28%, 55%);
+
+// sizes
+$padding: 1em;
+
+// fonts
+$font-title:   "Source Sans Pro", sans-serif;
+$font-body:  "Source Code Pro", monospace;
+$font-size:   18px;
+
+$line-height:  1.7em;
+
+// fonts imports
+@import "http://fonts.googleapis.com/css?family=Source+Code+Pro:300,400,600,900";
+
+@mixin iebox {
+  -moz-box-sizing:border-box;
+  box-sizing:border-box;
+}
+
+body {
+  padding: 0;
+  margin: 0;
+
+  font-family: $font-body;
+  font-size: $font-size;
+  line-height: $line-height;
+  font-weight: 300;
+
+  color: $text;
+  //background: $white;
+
+  @media (-webkit-min-device-pixel-ratio: 1.5), (min-resolution: 192dpi) {
+    font-size: $font-size * 1.5;
+  }
+}
+
+p {
+  margin: 0;
+  padding: 0 0 1em;
+}
+
+strong {
+  font-weight: 600;
+}
+
+h1 {
+  //font-family: $font-title;
+  font-weight: 900;
+  line-height: 1.2em;
+  //color: $green;
+}
+
+h2 {
+  font-weight: 600;
+  font-size: 1em;
+  //color: darken($dark-green, 10%);
+  color: $dark-green;
+  margin-top: 2em;
+
+  a {
+    font-weight: 300;
+  }
+}
+
+a {
+  text-decoration: none;
+  border-bottom: 3px solid $green;
+  padding-bottom: 1px;
+  //font-weight: 400;
+
+  color: $links;
+
+  &:hover {
+    border-bottom-color: $dark-green;
+  }
+}
+
+.container {
+  $margin: 150px;
+
+  max-width: 650px;
+  min-width: 500px;
+  margin: $margin auto;
+
+  border: 1px solid $text;
+  padding: 20px;
+
+  @media (max-width: 800px) {
+    width: 500px;
+    margin: $margin auto; 
+  }
+
+  @media (max-width: 600px) {
+    width: auto;
+    min-width: 0px;
+    padding: 0 50px;
+  }
+}
+
+
+p.meta {
+  font-size: .9em;
+  margin-top: 2em;
+  //margin-bottom: -1em;
+}
+
+header {
+	width: 100%;
+	display: table;
+
+	height: 50px;
+	line-height: 50px;
+
+	h1 {
+		float: left;
+		height: 50px;
+		line-height: 50px;
+		padding: 0;
+		margin: 0;
+
+		width: 200px;
+	}
+
+	input[type=text] {
+		@include iebox;
+
+		float: right;
+		width: calc(100% - 200px);
+		font-size: $font-size;
+		font-family: $font-body;
+		line-height: 1.3em;
+		padding: 10px;
+	}
+}
