@@ -2,6 +2,9 @@ require 'sequel'
 
 dburl = ENV['DATABASE_URL'] || "sqlite://searchdb.db"
 DB = Sequel.connect(dburl)
+if dburl == "sqlite://searchdb.db"
+	DB.synchronous = :off
+end
 
 DB.create_table? :pages do
 	primary_key :id

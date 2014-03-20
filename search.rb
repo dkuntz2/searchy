@@ -3,7 +3,7 @@ require 'set'
 require_relative 'Database.rb'
 require_relative 'utils.rb'
 
-class Result < Struct.new :url, :score
+class Result < Struct.new :url, :score, :title
 end
 
 def search searchterm
@@ -13,7 +13,7 @@ def search searchterm
 		k == ""
 	end
 
-	scores = {}
+	scores = []
 	Page.all.each do |page|
 		score = 0
 		terms.each do |term|
@@ -27,14 +27,16 @@ def search searchterm
 			score += term_freq * inverse_doc_freq
 		end
 
-		scores[page.url] = score
+		scores << Result.new(page.url, score, (page.title != "" ? page.title : page.url))
 	end
 
-	scores_arr = scores.collect { |k, v| Result.new(k, v) }
-	scores_arr.sort_by { |s| [-s.score, s.url] }
+	
+	scores.sort_by! { |s| [-s.score, s.url, s.title] }
 
-	scores_arr.tap {|sc| sc.delete_if {|s| s.score == 0 } }
+	scores.tap {|sc| sc.delete_if {|s| s.score == 0 } }
 end
+
+
 
 def crawl_ten page_url
 	page = crawl_page page_url

@@ -6,6 +6,21 @@
 
 	<script src="http://code.jquery.com/jquery-2.1.0.min.js"></script>
 	<script>
+		var query_string = function() {
+			var map = {};
+
+			if ("" != window.location.search) {
+				var groups = window.location.search.substr(1).split("&"), i;
+
+				for (i in groups) {
+					i = groups[i].split("=");
+					map[decodeURIComponent(i[0])] = decodeURIComponent(i[1]);
+				}
+			}
+
+			return map;
+		}
+	
 
 		/*	wait_n is a closure which waits a number of seconds before calling
 			the passed in function. Which is kinda cool. The ability to pass
@@ -61,13 +76,21 @@
 
 			$.each(data, function(i, item) {
 				var li = $("<li/>");
-				li.append($("<a/>", {href: item.url}).text(item.url));
+				var link = $("<a/>", {href: item.url})
+				link.append($("<span/>", {class: "title"}).text(item.title + " "));
+				link.append($("<span/>", {class: "url"}).text(item.url));
+
+				link.appendTo(li);
+				// li.append("(" + (Math.round(item.score * 10) / 10) + ")");
 				li.appendTo(results);
 			});
 		}
 
 		var result_request = function() {
-			$.get('/search', {terms: $("#search").val()}, function(data) {
+			var terms = $("#search").val();
+			history.pushState(null, null, "?search=" + terms);
+
+			$.get('/search', {terms: terms}, function(data) {
 				set_results(data);
 			});
 		}
@@ -76,6 +99,13 @@
 
 
 		$(document).ready(function() {
+			// determine if this is a search page.
+			var query = query_string().search;
+			if (query !== undefined) {
+				$("#search").val(query);
+				result_request();
+			}
+
 			$("#search").bind("propertychange keyup input paste", timed_request);
 			$("#search").bind("change", function() { timed_request(true); })
 		});

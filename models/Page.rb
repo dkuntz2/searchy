@@ -14,6 +14,21 @@ class Page < Sequel::Model
 		end
 	end
 
+	def self.crawl_all_forever
+		i = 1
+		while Page.where(:crawled => false).count != 0
+			puts
+			puts
+			puts
+			puts "Starting crawl iteration #{i.to_s}"
+			Page.where(:crawled => false).each do |p|
+				puts "Crawling #{p.url}"
+				p.crawl
+			end
+			i += 1
+		end
+	end
+
 	def self.crawl_domain domain
 		puts "Finding, and potentially crawling, root: #{domain}"
 		root = Page.find_or_create :url => domain
@@ -34,6 +49,13 @@ class Page < Sequel::Model
 		self.title = ""
 	end
 
+	def before_destroy
+		# clear out relations in other tables.
+		WordInPage.where(:page_id => self.id).each { |wip| wip.destroy }
+		PageLinks.where(:prime_id => self.id).each { |pl| pl.destroy }
+		PageLinks.where(:linked_id => self.id).each { |pl| pl.destroy }
+	end
+
 	def crawled?
 		self.crawled
 	end
@@ -48,12 +70,18 @@ class Page < Sequel::Model
 		self.domain = uri.host
 
 		# grab the contents of the page
-		html = open(uri).read()
-		
+		html = ""
+		cleaned = ""
+		begin
+			html = open(uri).read()
+			cleaned = Sanitize.clean(html)
+		rescue
+			self.destroy
+			return nil
+		end
 
 		##
 		# Word stuffs
-		cleaned = Sanitize.clean(html)
 		
 		# turn big string of words into array of words
 		words = cleaned.split
@@ -72,16 +100,29 @@ class Page < Sequel::Model
 		## 
 		# links and such
 		noko = Nokogiri::HTML(html)
-		self.title = noko.css("title")[0].text
+		title_tag = noko.css("title")[0]
+		if title_tag != nil
+			self.title = noko.css("title")[0].text
+		else
+			self.title = ""
+		end
 
 		links = noko.css("a").each do |a|
 			# is this a real page?
 			link = a["href"]
+			if link.nil? || link.length == 0
+				next
+			end
+
 			if link[0] != "/" && link[0, ("http".length)] != "http"
 				next
 			end
 			if link[0] == "/"
-				link = uri.scheme + '://' + uri.host + link
+				if link.length != 1 && link[1] == "/"
+					link = uri.scheme + link
+				else
+					link = uri.scheme + '://' + uri.host + link
+				end
 			end
 
 			if link[-1] == "/"

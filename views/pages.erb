@@ -12,12 +12,10 @@
 		<form id="newpage" action="/pages/new" method="post">
 			<h2>Add a page</h2>
 			<p>
-				Adding a page may take a while. Especially because there's a
-				crawl depth of 10. This means that the first ten pages found in
-				the crawl are also crawled.
+				Adding a page may take a while.
 			</p>
 
-			<p>&lsquo;We apologize for the inconvenience&rsquo;</p>
+			<p>&ldquo;We apologize for the inconvenience&rdquo;</p>
 			<input id="url" name="url" type="text" />
 			<input id="gotime" type="submit" />
 		</form>
@@ -38,7 +36,9 @@
 			<li>
 				<a href="<%= page.url %>"><%= page.url %></a>
 				<% unless page.crawled? %>
-					| <a href="/pages/<%= page.id %>/crawl">crawl</a>
+					<br />
+					<a href="/pages/<%= page.id %>/crawl">crawl</a>
+					| <a href="/pages/<%= page.id %>/delete">delete</a>
 				<% end %>
 			</li>
 		<% end %>

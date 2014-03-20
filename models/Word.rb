@@ -8,7 +8,7 @@ class Word < Sequel::Model
 	end
 
 	def inverse_document_frequency
-		num_pages = Page.all.count
+		num_pages = Page.where(:crawled => true).count
 		num_pages_with_word = WordInPage.where(:word_id => self.id).count
 
 		1 + Math.log(num_pages.to_f / (1 + num_pages_with_word).to_f)

@@ -147,3 +147,12 @@ header {
 		padding: 10px;
 	}
 }
+
+#results {
+  li {
+    margin-bottom: 1em;
+
+    .title { font-size: 1em; }
+    .url { font-size: .7em; }
+  }
+}

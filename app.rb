@@ -15,7 +15,7 @@ end
 get '/search' do
 	term = params[:terms]
 	results = search(term).map do |r|
-		{:url => r.url, :score => r.score}
+		{:url => r.url, :score => r.score, :title => r.title}
 	end
 
 	json results
@@ -54,6 +54,11 @@ get '/pages/:id/crawl' do
 	redirect to('/pages')
 end
 
+get '/pages/:id/delete' do
+	p = Page[params[:id].to_i]
+	p.destroy
+	redirect to('/pages')
+end
 
 ######################
 # Word related things
