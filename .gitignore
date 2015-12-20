@@ -1,3 +1,5 @@
 # local production database
 searchdb.db
 searchdb.db-journal
+.bundle/
+.sass-cache

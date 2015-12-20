@@ -4,8 +4,8 @@ require 'sinatra/json'
 
 require_relative 'search.rb'
 
-configure do 
-	require_relative 'Database.rb'
+configure do
+	require_relative 'database.rb'
 end
 
 get '/' do
@@ -33,8 +33,8 @@ end
 # Page related things
 ######################
 get '/pages' do
-	@pages = Page.order(:url).map do |p|
-		p
+	@pages = Page.order(:url).map do |page|
+		page
 	end
 
 	#json @pages
@@ -47,7 +47,7 @@ post '/pages/new' do
 	redirect to('/pages')
 end
 
-get '/pages/:id/crawl' do 
+get '/pages/:id/crawl' do
 	p = Page[params[:id].to_i]
 	p.crawl unless p.crawled?
 

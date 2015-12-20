@@ -1,13 +1,13 @@
 require 'set'
 
-require_relative 'Database.rb'
+require_relative 'database.rb'
 require_relative 'utils.rb'
 
-class Result < Struct.new :url, :score, :title
+class Result < Struct.new(:url, :score, :title)
 end
 
-def search searchterm
-	terms = searchterm.split
+def search(search_term)
+	terms = search_term.split
 	terms.delete_if do |k|
 		k.tokenize!
 		k == ""
@@ -17,7 +17,7 @@ def search searchterm
 	Page.all.each do |page|
 		score = 0
 		terms.each do |term|
-			unless page.has_word term
+			unless page.has_word(term)
 				next
 			end
 
@@ -30,16 +30,16 @@ def search searchterm
 		scores << Result.new(page.url, score, (page.title != "" ? page.title : page.url))
 	end
 
-	
+
 	scores.sort_by! { |s| [-s.score, s.url, s.title] }
 
-	scores.tap {|sc| sc.delete_if {|s| s.score == 0 } }
+	scores.tap { |sc| sc.delete_if {|s| s.score == 0 } }
 end
 
 
 
-def crawl_ten page_url
-	page = crawl_page page_url
+def crawl_ten(page_url)
+	page = crawl_page(page_url)
 
 	pages_to_crawl = []
 
@@ -56,7 +56,8 @@ def crawl_ten page_url
 
 
 	(1..10).each do |i|
-		p = crawl_page pages_to_crawl[i]
+		crawl_page(pages_to_crawl[i])
+
 		if pages_to_crawl.length <= 10
 			PageLinks.where(:prime_id => page.id).each do |pl|
 				unless page.crawled?
@@ -72,11 +73,10 @@ def crawl_ten page_url
 	end
 end
 
-def crawl_page page_url
+def crawl_page(page_url)
 	puts "crawling #{page_url}"
+	page = Page.find_or_create(:url => page_url)
 
-	pages_to_crawl = []
-	page = Page.find_or_create :url => page_url
 	unless page.crawled?
 		page.crawl
 	end
