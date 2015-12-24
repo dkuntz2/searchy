@@ -1,6 +1,7 @@
 require 'sinatra'
 require 'sinatra/sequel'
 require 'sinatra/json'
+require 'sass'
 
 require_relative 'search.rb'
 
@@ -14,35 +15,20 @@ end
 
 get '/search' do
 	term = params[:terms]
-	results = search(term).map do |r|
-		{:url => r.url, :score => r.score, :title => r.title}
-	end
-
-	json results
+	json search(term).map(&:to_h).to_a
 end
 
-
-## Stylesheets!
 get '/css/:name.css' do
 	content_type 'text/css', :charset => 'utf-8'
 	scss :"css/#{params[:name]}"
 end
 
-
-######################
-# Page related things
-######################
 get '/pages' do
-	@pages = Page.order(:url).map do |page|
-		page
-	end
-
-	#json @pages
+	@pages = Page.order(:url)
 	erb :pages
 end
 
 post '/pages/new' do
-	#crawl_ten params[:url]
 	Page.find_or_create(:url => params[:url]).crawl
 	redirect to('/pages')
 end
@@ -57,17 +43,11 @@ end
 get '/pages/:id/delete' do
 	p = Page[params[:id].to_i]
 	p.destroy
+
 	redirect to('/pages')
 end
 
-######################
-# Word related things
-######################
 get '/words' do
-	@words = []
-	Word.order(:word).map do |w|
-		@words << w.word
-	end
-
+	@words = Word.order(:word).map(&:word)
 	json @words
 end
