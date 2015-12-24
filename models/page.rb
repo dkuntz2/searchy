@@ -6,7 +6,6 @@ require 'sanitize'
 require_relative '../utils.rb'
 
 class Page < Sequel::Model
-
 	def self.crawl_uncrawled
 		Page.where(:crawled => false).each do |p|
 			puts "Crawling #{p.url}"
@@ -40,11 +39,11 @@ class Page < Sequel::Model
 		end
 	end
 
-
-
 	def before_create
 		self.crawled = false
 		self.title = ""
+
+		uri = self.url
 	end
 
 	def before_destroy
@@ -137,17 +136,15 @@ class Page < Sequel::Model
 		self.save
 	end
 
-	def has_word word
-		wip = self.get_word_in_page word
+	def has_word(word)
+		wip = self.get_word_in_page(word)
 		return !wip.nil?
 	end
 
-	def get_word_in_page word
+	def get_word_in_page(word)
 		# does the word exist in the DB
 		w = Word.where(:word => word)
-		if w.count == 0
-			return nil
-		end
+		return nil if w.count == 0
 
 		wip = WordInPage.where(:word_id => w.first.id, :page_id => self.id)
 		return wip.first

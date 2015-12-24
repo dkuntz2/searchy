@@ -7,11 +7,11 @@ class String
 		self.strip!
 		self.downcase!
 
-		while self.length > 0 and (self[0] < "a" or self[0] > "z") and (self[0] < "0" or self[0] > "9")
+		while self.length > 0 and !self[0].match(/^[[:alpha:]]$/)
 			self.slice!(0)
 		end
 
-		while self.length > 0 and (self[-1] < "a" or self[-1] > "z") and (self[-1] < "0" or self[-1] > "9")
+		while self.length > 0 and !self[-1].match(/^[[:alpha:]]$/)
 			self.slice!(-1)
 		end
 
